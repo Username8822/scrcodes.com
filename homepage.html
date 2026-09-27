@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>scrCodes - Developer Repository</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS SDK v2 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-indigo-600 selection:text-white">
+
+    <!-- Top Navigation & Real-time Status Bar -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-indigo-600 text-white font-black px-3 py-1.5 rounded-lg text-sm tracking-wider shadow-md shadow-indigo-600/30">scrCodes</div>
+                <nav class="hidden md:flex space-x-1 ml-4">
+                    <button onclick="switchTab('repo')" id="tab-btn-repo" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-slate-800 text-white transition">Repository</button>
+                    <button onclick="switchTab('settings')" id="tab-btn-settings" class="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white transition">Settings</button>
+                </nav>
+            </div>
+
+            <!-- Real-time Status Indicator Bar (Green / Yellow / Red) -->
+            <div class="flex items-center space-x-4">
+                <div id="status-badge" class="flex items-center space-x-2 bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-full text-xs font-medium shadow-inner">
+                    <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+                    <span id="status-text" class="text-slate-300">Connecting...</span>
+                </div>
+                <button id="logout-btn" onclick="handleLogout()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3 py-2 rounded-lg transition border border-slate-700">Sign Out</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+
+        <!-- VIEW 1: REPOSITORY -->
+        <section id="view-repo" class="space-y-6">
+            <!-- Toolbar Header -->
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-slate-900/50 border border-slate-800 p-6 rounded-2xl shadow-xl">
+                <div>
+                    <h1 class="text-2xl font-bold text-white tracking-tight">Code Repository</h1>
+                    <p class="text-slate-400 text-sm mt-0.5">Manage source files, organize folders, and execute secure user-owned deletions.</p>
+                </div>
+                
+                <!-- Action Controls -->
+                <div class="flex flex-wrap items-center gap-3">
+                    <input type="text" id="search-input" placeholder="Filter files..." oninput="filterFiles()" class="bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full sm:w-auto">
+                    
+                    <button onclick="createNewFolder()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium text-sm px-4 py-2 rounded-xl transition shadow-sm">
+                        + New Folder
+                    </button>
+
+                    <label for="file-upload" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm px-4 py-2 rounded-xl cursor-pointer transition shadow-lg shadow-indigo-600/25 text-center">
+                        + Upload File
+                    </label>
+                    <input type="file" id="file-upload" onchange="uploadFile(event)" class="hidden">
+                </div>
+            </div>
+
+            <!-- Feedback Message Banner -->
+            <div id="banner-msg" class="hidden p-4 rounded-xl text-sm border font-medium"></div>
+
+            <!-- Breadcrumbs / Path -->
+            <div class="flex items-center space-x-2 text-xs text-slate-400 px-1">
+                <span class="cursor-pointer hover:text-indigo-400" onclick="navigateToFolder('')">root</span>
+                <span id="current-path-display" class="text-indigo-400 font-mono font-bold">/</span>
+            </div>
+
+            <!-- Files & Folders Grid -->
+            <div id="repo-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="col-span-full text-center py-16 text-slate-500 border border-dashed border-slate-800 rounded-2xl">
+                    Loading repository contents...
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 2: ACCOUNT SETTINGS -->
+        <section id="view-settings" class="hidden max-w-2xl mx-auto space-y-6">
+            <div>
+                <h1 class="text-2xl font-bold text-white">Account Settings</h1>
+                <p class="text-slate-400 text-sm">Update your password or manage your developer session.</p>
+            </div>
+
+            <!-- Update Form -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl">
+                <h2 class="text-base font-semibold text-white">Security Credentials</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-slate-400 mb-1">New Password</label>
+                        <input type="password" id="settings-new-password" placeholder="Enter new password" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                    <button onclick="updatePassword()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition">Update Password</button>
+                </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="bg-red-950/20 border border-red-900/40 rounded-2xl p-6 space-y-4 shadow-xl">
+                <h2 class="text-base font-semibold text-red-400">Danger Zone</h2>
+                <p class="text-xs text-slate-400">Terminate your current session securely.</p>
+                <button onclick="handleLogout()" class="bg-red-600 hover:bg-red-500 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition">Sign Out</button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 py-6 text-center text-xs text-slate-500 mt-auto">
+        &copy; 2026 scrCodes.com &bull; Developer Repository
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC & SUPABASE INTEGRATION -->
+    <script>
+        // Pre-configured with your Supabase Project details
+        const SUPABASE_URL = 'https://uzoqpebcgteyfqymrvom.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_PMobZpTzx3p_bXcgctDysw_SNLMY8qU';
+
+        let supabaseClient = null;
+        let currentFiles = [];
+        let currentFolder = '';
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                
+                updateStatus('yellow', 'Authenticating...');
+                const { data: { session }, error } = await supabaseClient.auth.getSession();
+                
+                if (error || !session) {
+                    showBanner('Unauthorized session. Please log in.', 'red');
+                    updateStatus('red', 'Unauthorized');
+                    return;
+                }
+
+                updateStatus('green', 'Connected');
+                loadRepository();
+            } catch (err) {
+                console.error("Init Error:", err);
+                showBanner('Initialization failed: ' + err.message, 'red');
+                updateStatus('red', 'Connection Error');
+            }
+        });
+
+        function updateStatus(state, message) {
+            const dot = document.getElementById('status-dot');
+            const text = document.getElementById('status-text');
+            text.textContent = message;
+
+            if (state === 'green') {
+                dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
+            } else if (state === 'yellow') {
+                dot.className = "w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse";
+            } else if (state === 'red') {
+                dot.className = "w-2.5 h-2.5 rounded-full bg-red-500";
+            }
+        }
+
+        function showBanner(message, type = 'emerald') {
+            const banner = document.getElementById('banner-msg');
+            banner.className = `p-4 rounded-xl text-sm border font-medium ${
+                type === 'red' ? 'bg-red-950/40 border-red-900 text-red-300' : 'bg-emerald-950/40 border-emerald-900 text-emerald-300'
+            }`;
+            banner.textContent = message;
+            banner.classList.remove('hidden');
+            setTimeout(() => banner.classList.add('hidden'), 5000);
+        }
+
+        function switchTab(tab) {
+            const repoView = document.getElementById('view-repo');
+            const settingsView = document.getElementById('view-settings');
+            const btnRepo = document.getElementById('tab-btn-repo');
+            const btnSettings = document.getElementById('tab-btn-settings');
+
+            if (tab === 'repo') {
+                repoView.classList.remove('hidden');
+                settingsView.classList.add('hidden');
+                btnRepo.className = "px-3 py-1.5 rounded-lg text-sm font-medium bg-slate-800 text-white transition";
+                btnSettings.className = "px-3 py-1.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white transition";
+            } else {
+                repoView.classList.add('hidden');
+                settingsView.classList.remove('hidden');
+                btnSettings.className = "px-3 py-1.5 rounded-lg text-sm font-medium bg-slate-800 text-white transition";
+                btnRepo.className = "px-3 py-1.5 rounded-lg text-sm font-medium text-slate-400 hover:text-white transition";
+            }
+        }
+
+        async function loadRepository() {
+            updateStatus('yellow', 'Loading...');
+            try {
+                const { data, error } = await supabaseClient.storage
+                    .from('code-files')
+                    .list(currentFolder, { limit: 100, sortBy: { column: 'name', order: 'asc' } });
+
+                if (error) throw error;
+
+                currentFiles = data || [];
+                renderFiles(currentFiles);
+                updateStatus('green', 'Connected');
+            } catch (err) {
+                console.error("Load Error:", err);
+                showBanner('Failed to load repository: ' + err.message, 'red');
+                updateStatus('red', 'Sync Error');
+            }
+        }
+
+        function renderFiles(files) {
+            const grid = document.getElementById('repo-grid');
+            document.getElementById('current-path-display').textContent = '/' + currentFolder;
+
+            if (files.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-16 text-slate-500 border border-dashed border-slate-800 rounded-2xl">Folder is empty. Upload a file or create a folder.</div>`;
+                return;
+            }
+
+            grid.innerHTML = files.map(file => {
+                const isFolder = !file.id;
+                const icon = isFolder ? '📁' : '📄';
+                const name = file.name;
+                const size = file.metadata ? Math.round(file.metadata.size / 1024) + ' KB' : 'Folder';
+
+                const actionButtons = isFolder ? `
+                    <button onclick="deleteItem('${name}')" class="text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition text-xs bg-slate-950 px-2.5 py-1.5 rounded-lg border border-slate-800">
+                        Delete
+                    </button>
+                ` : `
+                    <div class="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition">
+                        <button onclick="downloadFile('${name}')" class="text-indigo-400 hover:text-indigo-300 text-xs bg-slate-950 px-2.5 py-1.5 rounded-lg border border-slate-800">
+                            Download
+                        </button>
+                        <button onclick="deleteItem('${name}')" class="text-slate-500 hover:text-red-400 text-xs bg-slate-950 px-2.5 py-1.5 rounded-lg border border-slate-800">
+                            Delete
+                        </button>
+                    </div>
+                `;
+
+                return `
+                    <div class="bg-slate-900/80 border border-slate-800 hover:border-slate-700 p-4 rounded-2xl flex items-center justify-between transition group shadow-md">
+                        <div class="flex items-center space-x-3 truncate cursor-pointer" ${isFolder ? `onclick="navigateToFolder('${name}')"` : ''}>
+                            <span class="text-2xl">${icon}</span>
+                            <div class="truncate">
+                                <h3 class="text-sm font-semibold text-white truncate">${name}</h3>
+                                <p class="text-xs text-slate-500">${size}</p>
+                            </div>
+                        </div>
+                        ${actionButtons}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function navigateToFolder(folderName) {
+            currentFolder = currentFolder ? `${currentFolder}/${folderName}` : folderName;
+            loadRepository();
+        }
+
+        async function uploadFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            updateStatus('yellow', 'Uploading...');
+            const filePath = currentFolder ? `${currentFolder}/${file.name}` : file.name;
+
+            try {
+                const { error } = await supabaseClient.storage
+                    .from('code-files')
+                    .upload(filePath, file, { upsert: true });
+
+                if (error) throw error;
+
+                showBanner(`Uploaded ${file.name} successfully!`, 'emerald');
+                loadRepository();
+            } catch (err) {
+                showBanner('Upload failed: ' + err.message, 'red');
+                updateStatus('red', 'Upload Error');
+            }
+        }
+
+        async function downloadFile(name) {
+            updateStatus('yellow', 'Preparing download...');
+            const targetPath = currentFolder ? `${currentFolder}/${name}` : name;
+
+            try {
+                const { data, error } = await supabaseClient.storage
+                    .from('code-files')
+                    .createSignedUrl(targetPath, 60);
+
+                if (error) throw error;
+
+                const link = document.createElement('a');
+                link.href = data.signedUrl;
+                link.download = name;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                showBanner(`Started download for ${name}`, 'emerald');
+                updateStatus('green', 'Connected');
+            } catch (err) {
+                showBanner('Download failed: ' + err.message, 'red');
+                updateStatus('red', 'Download Error');
+            }
+        }
+
+        async function createNewFolder() {
+            const folderName = prompt("Enter new folder name:");
+            if (!folderName) return;
+
+            updateStatus('yellow', 'Creating folder...');
+            const folderPath = currentFolder ? `${currentFolder}/${folderName}/.keep` : `${folderName}/.keep`;
+            const emptyBlob = new Blob([''], { type: 'text/plain' });
+
+            try {
+                const { error } = await supabaseClient.storage
+                    .from('code-files')
+                    .upload(folderPath, emptyBlob);
+
+                if (error) throw error;
+
+                showBanner(`Folder "${folderName}" created!`, 'emerald');
+                loadRepository();
+            } catch (err) {
+                showBanner('Folder creation failed: ' + err.message, 'red');
+                updateStatus('red', 'Folder Error');
+            }
+        }
+
+        async function deleteItem(name) {
+            if (!confirm(`Are you sure you want to delete ${name}?`)) return;
+
+            updateStatus('yellow', 'Deleting...');
+            const targetPath = currentFolder ? `${currentFolder}/${name}` : name;
+
+            try {
+                const { error } = await supabaseClient.storage
+                    .from('code-files')
+                    .remove([targetPath]);
+
+                if (error) throw error;
+
+                showBanner(`Deleted ${name}.`, 'emerald');
+                loadRepository();
+            } catch (err) {
+                showBanner('Delete failed. Check if you own this file or if the DELETE RLS policy is active.', 'red');
+                updateStatus('red', 'Permission Error');
+            }
+        }
+
+        function filterFiles() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const filtered = currentFiles.filter(f => f.name.toLowerCase().includes(query));
+            renderFiles(filtered);
+        }
+
+        async function updatePassword() {
+            const newPassword = document.getElementById('settings-new-password').value;
+            if (!newPassword) return alert('Enter a new password.');
+
+            updateStatus('yellow', 'Updating password...');
+            try {
+                const { error } = await supabaseClient.auth.updateUser({ password: newPassword });
+                if (error) throw error;
+                showBanner('Password updated successfully!', 'emerald');
+                updateStatus('green', 'Connected');
+                document.getElementById('settings-new-password').value = '';
+            } catch (err) {
+                showBanner('Error: ' + err.message, 'red');
+                updateStatus('red', 'Error');
+            }
+        }
+
+        async function handleLogout() {
+            await supabaseClient.auth.signOut();
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

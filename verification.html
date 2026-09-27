@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>scrcodes.com - System Verification</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #0f172a;
+        }
+
+        .font-code {
+            font-family: 'Fira Code', monospace;
+        }
+
+        .bg-grid-pattern {
+            background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+    </style>
+</head>
+<body class="bg-grid-pattern min-h-screen text-slate-100 flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+    <!-- Top Navigation Header -->
+    <header class="w-full bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-10">
+        <div class="max-w-6xl mx-auto px-4 py-3.5 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold shadow-lg shadow-indigo-500/20">
+                    <i class="fa-solid fa-code text-base"></i>
+                </div>
+                <div>
+                    <span class="text-sm font-bold text-white tracking-tight font-code">scrcodes.com</span>
+                    <span class="block text-[10px] text-slate-400">Security Gatekeeper</span>
+                </div>
+            </div>
+
+            <div id="statusBadge" class="flex items-center space-x-2 text-xs bg-amber-950/60 text-amber-400 px-3 py-1 rounded-full border border-amber-800/50">
+                <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                <span id="statusText" class="font-medium font-code">Verification Required</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 flex items-center justify-center px-4 py-12">
+        <div class="max-w-xl w-full bg-slate-900/90 backdrop-blur-xl rounded-2xl border border-slate-800 shadow-2xl p-6 sm:p-8 text-left relative overflow-hidden">
+            
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500"></div>
+
+            <h1 class="text-xl font-bold text-white tracking-tight mb-1 flex items-center gap-2">
+                <i class="fa-solid fa-shield-halved text-indigo-400"></i>
+                Browser Security Diagnostic
+            </h1>
+            <p class="text-xs text-slate-400 mb-6">Complete all steps to prove environment authenticity.</p>
+
+            <!-- STEP 1: Real Browser Signals Diagnostic -->
+            <div class="mb-6 bg-slate-950/60 border border-slate-800 rounded-xl p-4 font-code text-xs space-y-2">
+                <div class="text-slate-400 mb-2 font-semibold flex justify-between items-center">
+                    <span>1. Real Browser Signals</span>
+                    <span id="scoreTag" class="text-[10px] text-slate-500">Evaluating...</span>
+                </div>
+                <div class="flex justify-between items-center py-1 border-b border-slate-800/50">
+                    <span class="text-slate-400">WebDriver / Automation:</span>
+                    <span id="sigWebdriver" class="font-bold text-slate-500">Checking...</span>
+                </div>
+                <div class="flex justify-between items-center py-1 border-b border-slate-800/50">
+                    <span class="text-slate-400">Screen Resolution:</span>
+                    <span id="sigScreen" class="font-bold text-slate-500">Checking...</span>
+                </div>
+                <div class="flex justify-between items-center py-1 border-b border-slate-800/50">
+                    <span class="text-slate-400">Hardware Concurrency:</span>
+                    <span id="sigHardware" class="font-bold text-slate-500">Checking...</span>
+                </div>
+                <div class="flex justify-between items-center py-1">
+                    <span class="text-slate-400">Language & Locale:</span>
+                    <span id="sigLang" class="font-bold text-slate-500">Checking...</span>
+                </div>
+            </div>
+
+            <!-- STEP 2: Custom Interactive Checkbox -->
+            <div class="mb-6 bg-slate-800/40 border border-slate-800 rounded-xl p-4 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <button id="customCheckbox" type="button" class="w-7 h-7 bg-slate-950 border-2 border-slate-700 rounded flex items-center justify-center hover:border-indigo-500 transition-colors cursor-pointer">
+                        <i id="checkIcon" class="fa-solid fa-check text-xs text-indigo-400 hidden"></i>
+                    </button>
+                    <label for="customCheckbox" class="text-xs text-slate-300 font-medium cursor-pointer select-none">
+                        I confirm this session is human-driven
+                    </label>
+                </div>
+                <i class="fa-solid fa-user-shield text-slate-600 text-lg"></i>
+            </div>
+
+            <!-- STEP 3: Terminal Code Entry -->
+            <div class="mb-6">
+                <label class="block text-xs font-semibold text-slate-300 mb-2 font-code">
+                    2. Type <span class="text-indigo-400">verify</span> in the terminal prompt below:
+                </label>
+                <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 font-code text-xs flex items-center gap-2">
+                    <span class="text-indigo-400">$</span>
+                    <input id="commandInput" type="text" placeholder="type 'verify' here" autocomplete="off" spellcheck="false" class="bg-transparent text-white focus:outline-none w-full placeholder-slate-600">
+                </div>
+            </div>
+
+            <!-- Error Banner -->
+            <div id="errorBanner" class="hidden mb-4 p-3 bg-red-950/60 border border-red-800/50 rounded-xl text-red-300 text-xs font-code flex items-center gap-2">
+                <i class="fa-solid fa-triangle-exclamation text-red-400"></i>
+                <span id="errorMessage">Security validation failed.</span>
+            </div>
+
+            <!-- Submit Button -->
+            <button id="verifyBtn" disabled class="w-full bg-slate-800 text-slate-500 font-medium py-3 px-6 rounded-xl text-xs font-code flex items-center justify-center space-x-2 transition-all duration-200 cursor-not-allowed">
+                <span id="btnText">Pass Security Gate</span>
+                <i id="btnIcon" class="fa-solid fa-arrow-right text-xs"></i>
+            </button>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full border-t border-slate-800/60 bg-slate-950/50 py-4 text-center text-xs text-slate-500 font-code">
+        &copy; 2026 scrcodes.com. Automated verification engine.
+    </footer>
+
+    <script>
+        let isCheckboxChecked = false;
+        let suspicionScore = 0;
+
+        const customCheckbox = document.getElementById('customCheckbox');
+        const checkIcon = document.getElementById('checkIcon');
+        const commandInput = document.getElementById('commandInput');
+        const verifyBtn = document.getElementById('verifyBtn');
+        const btnText = document.getElementById('btnText');
+        const btnIcon = document.getElementById('btnIcon');
+        const statusBadge = document.getElementById('statusBadge');
+        const statusText = document.getElementById('statusText');
+        const errorBanner = document.getElementById('errorBanner');
+        const errorMessage = document.getElementById('errorMessage');
+
+        window.addEventListener('DOMContentLoaded', runSecurityInspection);
+
+        function runSecurityInspection() {
+            const isWebdriver = navigator.webdriver || false;
+            const sigWebdriver = document.getElementById('sigWebdriver');
+            if (isWebdriver) {
+                sigWebdriver.textContent = 'Detected (Bot Flag)';
+                sigWebdriver.className = 'font-bold text-red-400';
+                suspicionScore += 50;
+            } else {
+                sigWebdriver.textContent = 'Clean (Human Flag)';
+                sigWebdriver.className = 'font-bold text-emerald-400';
+            }
+
+            const sigScreen = document.getElementById('sigScreen');
+            const screenValid = window.screen.width > 0 && window.screen.height > 0;
+            if (!screenValid || (window.screen.width === 800 && window.screen.height === 600)) {
+                sigScreen.textContent = `${window.screen.width}x${window.screen.height} (Suspect)`;
+                sigScreen.className = 'font-bold text-amber-400';
+                suspicionScore += 25;
+            } else {
+                sigScreen.textContent = `${window.screen.width}x${window.screen.height}`;
+                sigScreen.className = 'font-bold text-emerald-400';
+            }
+
+            const sigHardware = document.getElementById('sigHardware');
+            const cores = navigator.hardwareConcurrency || 0;
+            if (cores === 0) {
+                sigHardware.textContent = '0 Cores (Suspect Headless)';
+                sigHardware.className = 'font-bold text-red-400';
+                suspicionScore += 25;
+            } else {
+                sigHardware.textContent = `${cores} Threads`;
+                sigHardware.className = 'font-bold text-emerald-400';
+            }
+
+            const sigLang = document.getElementById('sigLang');
+            if (!navigator.language) {
+                sigLang.textContent = 'Missing';
+                sigLang.className = 'font-bold text-amber-400';
+                suspicionScore += 15;
+            } else {
+                sigLang.textContent = navigator.language;
+                sigLang.className = 'font-bold text-emerald-400';
+            }
+
+            const scoreTag = document.getElementById('scoreTag');
+            scoreTag.textContent = `Risk Score: ${suspicionScore}/100`;
+            if (suspicionScore >= 50) {
+                scoreTag.className = 'text-[10px] text-red-400 font-bold';
+            } else {
+                scoreTag.className = 'text-[10px] text-emerald-400 font-bold';
+            }
+
+            validateFormState();
+        }
+
+        customCheckbox.addEventListener('click', () => {
+            isCheckboxChecked = !isCheckboxChecked;
+            if (isCheckboxChecked) {
+                checkIcon.classList.remove('hidden');
+                customCheckbox.classList.add('border-indigo-500', 'bg-indigo-950/40');
+            } else {
+                checkIcon.classList.add('hidden');
+                customCheckbox.classList.remove('border-indigo-500', 'bg-indigo-950/40');
+            }
+            validateFormState();
+        });
+
+        commandInput.addEventListener('input', validateFormState);
+
+        function validateFormState() {
+            const commandValue = commandInput.value.trim().toLowerCase();
+            const isCommandCorrect = commandValue === 'verify';
+
+            if (isCheckboxChecked && isCommandCorrect) {
+                verifyBtn.disabled = false;
+                verifyBtn.className = 'w-full bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-medium py-3 px-6 rounded-xl text-xs font-code flex items-center justify-center space-x-2 transition-all duration-200 cursor-pointer shadow-lg shadow-indigo-600/25';
+            } else {
+                verifyBtn.disabled = true;
+                verifyBtn.className = 'w-full bg-slate-800 text-slate-500 font-medium py-3 px-6 rounded-xl text-xs font-code flex items-center justify-center space-x-2 transition-all duration-200 cursor-not-allowed';
+            }
+        }
+
+        verifyBtn.addEventListener('click', () => {
+            if (suspicionScore >= 50) {
+                errorBanner.classList.remove('hidden');
+                errorMessage.textContent = 'Automated bot indicators detected in your browser environment.';
+                return;
+            }
+
+            // Show smooth inline verification success
+            verifyBtn.disabled = true;
+            verifyBtn.className = 'w-full bg-emerald-600 text-white font-medium py-3 px-6 rounded-xl text-xs font-code flex items-center justify-center space-x-2 transition-all duration-200 cursor-default';
+            btnText.textContent = 'Verified! Redirecting...';
+            btnIcon.className = 'fa-solid fa-circle-check text-xs';
+
+            statusBadge.className = 'flex items-center space-x-2 text-xs bg-emerald-950/60 text-emerald-400 px-3 py-1 rounded-full border border-emerald-800/50';
+            statusText.textContent = 'Verification Passed';
+
+            // Clean delay before loading homepage
+            setTimeout(() => {
+                window.location.href = 'welcome.html';
+            }, 800);
+        });
+    </script>
+</body>
+</html>
